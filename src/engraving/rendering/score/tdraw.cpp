@@ -1348,17 +1348,27 @@ void TDraw::draw(const FretDiagram* item, Painter* painter, const PaintOptions& 
     double x2 = (item->strings() - 1) * ldata->stringDist;
 
     // Draw the nut
-    pen.setWidthF(ldata->nutLineWidth);
-    painter->setPen(pen);
-    double nutY = ldata->nutY;
-    painter->drawLine(LineF(-ldata->stringLineWidth * .5, nutY, x2 + ldata->stringLineWidth * .5, nutY));
+    if (!item->fretOffset() && item->showNut()) {
+        // Double-line nut: two lines each stringLineWidth wide, gap = 2 * stringLineWidth
+        double lw = ldata->stringLineWidth;
+        pen.setWidthF(lw);
+        painter->setPen(pen);
+        painter->drawLine(LineF(-lw * .5, -lw * 2.5, x2 + lw * .5, -lw * 2.5));
+        painter->drawLine(LineF(-lw * .5, -lw * 0.5, x2 + lw * .5, -lw * 0.5));
+    } else {
+        pen.setWidthF(ldata->nutLineWidth);
+        painter->setPen(pen);
+        painter->drawLine(LineF(-ldata->stringLineWidth * .5, ldata->nutY, x2 + ldata->stringLineWidth * .5, ldata->nutY));
+    }
 
     // Draw strings and frets
     pen.setWidthF(ldata->stringLineWidth);
     painter->setPen(pen);
 
     // y2 is the y val of the bottom fretline
-    double y1 = ldata->stringExtendTop;
+    double y1 = (!item->fretOffset() && item->showNut())
+                ? -ldata->stringLineWidth * 3.0
+                : ldata->stringExtendTop;
     double y2 = ldata->fretDist * item->frets() + 0.5 * ldata->stringLineWidth + ldata->stringExtendBottom;
     for (int i = 0; i < item->strings(); ++i) {
         double x = ldata->stringDist * i;
@@ -1407,10 +1417,19 @@ void TDraw::draw(const FretDiagram* item, Painter* painter, const PaintOptions& 
                 painter->drawRect(RectF(x, y, dotd, dotd));
                 break;
             case FretDotType::TRIANGLE:
+                painter->setBrush(BrushStyle::NoBrush);
                 painter->drawLine(LineF(x, y + dotd, x + .5 * dotd, y));
                 painter->drawLine(LineF(x + .5 * dotd, y, x + dotd, y + dotd));
                 painter->drawLine(LineF(x + dotd, y + dotd, x, y + dotd));
                 break;
+            case FretDotType::TRIANGLE_FILLED: {
+                painter->setBrush(symPen.color());
+                painter->setNoPen();
+                PolygonF tri;
+                tri << PointF(x, y + dotd) << PointF(x + .5 * dotd, y) << PointF(x + dotd, y + dotd);
+                painter->drawPolygon(tri);
+                break;
+            }
             case FretDotType::NORMAL:
             default:
                 painter->setBrush(symPen.color());
@@ -1439,6 +1458,14 @@ void TDraw::draw(const FretDiagram* item, Painter* painter, const PaintOptions& 
         } else if (marker.mtype == FretMarkerType::CROSS) {
             painter->drawLine(PointF(x, y), PointF(x + ldata->markerSize, y + ldata->markerSize));
             painter->drawLine(PointF(x, y + ldata->markerSize), PointF(x + ldata->markerSize, y));
+        } else {
+            Font markerFont(item->fingeringFont());
+            markerFont.setPointSizeF(markerFont.pointSizeF() * (item->spatium() / item->defaultSpatium()));
+            markerFont.setItalic(false);
+            painter->setFont(markerFont);
+            painter->drawText(RectF(x, y, ldata->markerSize, ldata->markerSize),
+                              muse::draw::AlignCenter | muse::draw::TextDontClip,
+                              FretItem::markerToChar(marker.mtype));
         }
     }
 
@@ -2119,7 +2146,7 @@ void TDraw::draw(const Lasso* item, Painter* painter, const PaintOptions&)
     const Lasso::LayoutData* ldata = item->ldata();
     painter->setBrush(Brush(item->configuration()->lassoColor()));
     // always 2 pixel width
-    double w = 2.0 / painter->worldTransform().m11() * item->configuration()->guiScaling(item->iocContext());
+    double w = 2.0 / painter->worldTransform().m11() * item->configuration()->guiScaling();
     painter->setPen(Pen(item->configuration()->selectionColor(), w));
     painter->drawRect(ldata->bbox());
 }

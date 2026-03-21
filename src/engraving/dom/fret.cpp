@@ -390,7 +390,10 @@ void FretDiagram::setDot(int string, int fret, bool add /*= false*/, FretDotType
 
         m_dots[string].push_back(FretItem::Dot(fret, dtype));
         if (!add) {
-            setMarker(string, FretMarkerType::NONE);
+            FretMarkerType currentMarker = marker(string).mtype;
+            if (currentMarker == FretMarkerType::CROSS || currentMarker == FretMarkerType::CIRCLE) {
+                setMarker(string, FretMarkerType::NONE);
+            }
         }
     }
 }
@@ -417,9 +420,11 @@ void FretDiagram::setMarker(int string, FretMarkerType mtype)
 {
     if (string >= 0 && string < m_strings) {
         m_markers[string] = FretItem::Marker(mtype);
-        if (mtype != FretMarkerType::NONE) {
+        if (mtype == FretMarkerType::CROSS || mtype == FretMarkerType::CIRCLE) {
             removeDot(string);
             removeBarres(string);
+        } else if (mtype == FretMarkerType::NONE) {
+            // no removal needed
         }
     }
 }
@@ -590,7 +595,8 @@ void FretDiagram::removeDotsMarkers(int ss, int es, int fret)
     for (int string = ss; string <= end; ++string) {
         removeDot(string, fret);
 
-        if (marker(string).exists()) {
+        FretMarkerType mt = marker(string).mtype;
+        if (mt == FretMarkerType::CROSS || mt == FretMarkerType::CIRCLE) {
             removeMarker(string);
         }
     }
@@ -601,6 +607,8 @@ void FretDiagram::removeDotsMarkers(int ss, int es, int fret)
 //   - Each character or bracketed block represents a string, from lowest to highest.
 //   - 'X' = muted string (cross marker)
 //   - 'O' = open string (circle marker)
+//   - '1'/'2'/'3'/'4' = top finger markers
+//   - 'D' = thumb marker
 //   - '-' = empty or unused string
 //   - [fret-type,...] = one or more fretted dots on that string:
 //       • fret is absolute (already includes offset)
@@ -675,6 +683,8 @@ void FretDiagram::applyDiagramPattern(FretDiagram* diagram, const String& patter
                         break;
                     case 'T': dt = FretDotType::TRIANGLE;
                         break;
+                    case 'F': dt = FretDotType::TRIANGLE_FILLED;
+                        break;
                     default:  dt = FretDotType::NORMAL;
                         break;
                     }
@@ -689,6 +699,16 @@ void FretDiagram::applyDiagramPattern(FretDiagram* diagram, const String& patter
             diagram->setMarker(i, FretMarkerType::CROSS);
         } else if (token == u"O") {
             diagram->setMarker(i, FretMarkerType::CIRCLE);
+        } else if (token == u"1") {
+            diagram->setMarker(i, FretMarkerType::FINGER1);
+        } else if (token == u"2") {
+            diagram->setMarker(i, FretMarkerType::FINGER2);
+        } else if (token == u"3") {
+            diagram->setMarker(i, FretMarkerType::FINGER3);
+        } else if (token == u"4") {
+            diagram->setMarker(i, FretMarkerType::FINGER4);
+        } else if (token == u"D") {
+            diagram->setMarker(i, FretMarkerType::THUMB);
         }
     }
 
@@ -736,12 +756,31 @@ String FretDiagram::patternFromDiagram() const
     for (int i = 0; i < diagramStrings; ++i) {
         const FretItem::Marker fretMarker = marker(i);
 
-        if (fretMarker.mtype == FretMarkerType::CROSS) {
+        switch (fretMarker.mtype) {
+        case FretMarkerType::CROSS:
             patternParts.push_back(u"X");
             continue;
-        } else if (fretMarker.mtype == FretMarkerType::CIRCLE) {
+        case FretMarkerType::CIRCLE:
             patternParts.push_back(u"O");
             continue;
+        case FretMarkerType::FINGER1:
+            patternParts.push_back(u"1");
+            continue;
+        case FretMarkerType::FINGER2:
+            patternParts.push_back(u"2");
+            continue;
+        case FretMarkerType::FINGER3:
+            patternParts.push_back(u"3");
+            continue;
+        case FretMarkerType::FINGER4:
+            patternParts.push_back(u"4");
+            continue;
+        case FretMarkerType::THUMB:
+            patternParts.push_back(u"D");
+            continue;
+        case FretMarkerType::NONE:
+        default:
+            break;
         }
 
         const auto it = dotsMap.find(i);
@@ -773,7 +812,9 @@ String FretDiagram::patternFromDiagram() const
                     break;
                 case FretDotType::SQUARE:   typeChar = u'S';
                     break;
-                case FretDotType::TRIANGLE: typeChar = u'T';
+                case FretDotType::TRIANGLE:        typeChar = u'T';
+                    break;
+                case FretDotType::TRIANGLE_FILLED: typeChar = u'F';
                     break;
                 default: break;
                 }
@@ -1233,6 +1274,21 @@ String FretDiagram::screenReaderInfo() const
         case FretMarkerType::CROSS:
             markerName = muse::mtrc("engraving", "cross marker");
             break;
+        case FretMarkerType::FINGER1:
+            markerName = muse::mtrc("engraving", "finger 1 marker");
+            break;
+        case FretMarkerType::FINGER2:
+            markerName = muse::mtrc("engraving", "finger 2 marker");
+            break;
+        case FretMarkerType::FINGER3:
+            markerName = muse::mtrc("engraving", "finger 3 marker");
+            break;
+        case FretMarkerType::FINGER4:
+            markerName = muse::mtrc("engraving", "finger 4 marker");
+            break;
+        case FretMarkerType::THUMB:
+            markerName = muse::mtrc("engraving", "thumb marker");
+            break;
         case FretMarkerType::NONE:
         default:
             break;
@@ -1442,6 +1498,11 @@ Char FretItem::markerToChar(FretMarkerType t)
     switch (t) {
     case FretMarkerType::CIRCLE: return Char(u'O');
     case FretMarkerType::CROSS: return Char(u'X');
+    case FretMarkerType::FINGER1: return Char(u'1');
+    case FretMarkerType::FINGER2: return Char(u'2');
+    case FretMarkerType::FINGER3: return Char(u'3');
+    case FretMarkerType::FINGER4: return Char(u'4');
+    case FretMarkerType::THUMB: return Char(u'D');
     case FretMarkerType::NONE:
     default:
         return Char();
@@ -1455,6 +1516,11 @@ Char FretItem::markerToChar(FretMarkerType t)
 const std::vector<FretItem::MarkerTypeNameItem> FretItem::markerTypeNameMap = {
     { FretMarkerType::CIRCLE,     "circle" },
     { FretMarkerType::CROSS,      "cross" },
+    { FretMarkerType::FINGER1,    "finger1" },
+    { FretMarkerType::FINGER2,    "finger2" },
+    { FretMarkerType::FINGER3,    "finger3" },
+    { FretMarkerType::FINGER4,    "finger4" },
+    { FretMarkerType::THUMB,      "thumb" },
     { FretMarkerType::NONE,       "none" }
 };
 
@@ -1493,7 +1559,8 @@ const std::vector<FretItem::DotTypeNameItem> FretItem::dotTypeNameMap = {
     { FretDotType::NORMAL,        "normal" },
     { FretDotType::CROSS,         "cross" },
     { FretDotType::SQUARE,        "square" },
-    { FretDotType::TRIANGLE,      "triangle" },
+    { FretDotType::TRIANGLE,         "triangle" },
+    { FretDotType::TRIANGLE_FILLED,  "triangle_filled" },
 };
 
 String FretItem::dotTypeToName(FretDotType t)

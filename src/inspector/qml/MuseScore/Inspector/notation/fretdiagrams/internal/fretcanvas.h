@@ -49,6 +49,7 @@ public:
     explicit FretCanvas(QQuickItem* parent = nullptr);
 
     Q_INVOKABLE void clear();
+    Q_INVOKABLE void setTopMarker(int string, int markerType);
 
     void setFretDiagram(QVariant fd);
 
@@ -70,6 +71,7 @@ public slots:
 
 signals:
     void diagramChanged(QVariant diagram);
+    void markerSelectionRequested(int string, int x, int y);
 
     void currentFretDotTypeChanged(int currentFretDotType);
     void isBarreModeOnChanged(bool isBarreModeOn);

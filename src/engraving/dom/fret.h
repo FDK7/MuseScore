@@ -40,13 +40,19 @@ enum class FretDotType : signed char {
     NORMAL = 0,
     CROSS,
     SQUARE,
-    TRIANGLE = 3
+    TRIANGLE = 3,
+    TRIANGLE_FILLED = 4
 };
 
 enum class FretMarkerType : signed char {
     NONE,
     CIRCLE,
-    CROSS
+    CROSS,
+    FINGER1,
+    FINGER2,
+    FINGER3,
+    FINGER4,
+    THUMB
 };
 
 class FretItem

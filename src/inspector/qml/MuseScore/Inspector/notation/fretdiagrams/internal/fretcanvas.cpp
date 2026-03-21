@@ -65,14 +65,26 @@ void FretCanvas::draw(QPainter* painter)
     painter->translate(xo, yo);
 
     QPen pen(painter->pen());
-    pen.setWidthF(lw2);
     pen.setCapStyle(Qt::FlatCap);
     pen.setColor(color());
-    painter->setPen(pen);
     painter->setBrush(pen.color());
     double x2 = (_strings - 1) * stringDist;
-    double yNut = -0.5 * (lw2 - lw1);
-    painter->drawLine(QLineF(-lw1 * .5, yNut, x2 + lw1 * .5, yNut));
+
+    if (!fretOffset && m_diagram->showNut()) {
+        // Double-line nut: two lines, each lw1 wide, gap = lw1
+        pen.setWidthF(lw1);
+        painter->setPen(pen);
+        double yNutLower = -lw1 * 0.5;          // bottom edge touches y=0
+        double yNutUpper = -lw1 * 2.5;          // gap of lw1 between rendered lines
+        painter->drawLine(QLineF(-lw1 * .5, yNutUpper, x2 + lw1 * .5, yNutUpper));
+        painter->drawLine(QLineF(-lw1 * .5, yNutLower, x2 + lw1 * .5, yNutLower));
+    } else {
+        // Single line for fret-offset diagrams or when nut is hidden
+        pen.setWidthF(lw2);
+        painter->setPen(pen);
+        double yNut = -0.5 * (lw2 - lw1);
+        painter->drawLine(QLineF(-lw1 * .5, yNut, x2 + lw1 * .5, yNut));
+    }
 
     pen.setWidthF(lw1);
     painter->setPen(pen);
@@ -83,9 +95,10 @@ void FretCanvas::draw(QPainter* painter)
     symPen.setWidthF(lw1 * 1.2);
 
     // Draw strings and frets
+    double stringTop = (!fretOffset && m_diagram->showNut()) ? -lw1 * 3.0 : 0.0;
     for (int i = 0; i < _strings; ++i) {
         double x = stringDist * i;
-        painter->drawLine(QLineF(x, 0.0, x, y2));
+        painter->drawLine(QLineF(x, stringTop, x, y2));
     }
     for (int i = 1; i <= _frets; ++i) {
         double y = fretDist * i;
@@ -228,10 +241,19 @@ void FretCanvas::paintDotSymbol(QPainter* p, QPen& pen, qreal x, qreal y, qreal 
         p->drawRect(QRectF(x, y, dotd, dotd));
         break;
     case mu::engraving::FretDotType::TRIANGLE:
+        p->setBrush(Qt::NoBrush);
         p->drawLine(QLineF(x, y + dotd, x + .5 * dotd, y));
         p->drawLine(QLineF(x + .5 * dotd, y, x + dotd, y + dotd));
         p->drawLine(QLineF(x + dotd, y + dotd, x, y + dotd));
         break;
+    case mu::engraving::FretDotType::TRIANGLE_FILLED: {
+        p->setBrush(pen.color());
+        QPolygonF tri;
+        tri << QPointF(x, y + dotd) << QPointF(x + .5 * dotd, y) << QPointF(x + dotd, y + dotd);
+        p->setPen(Qt::NoPen);
+        p->drawPolygon(tri);
+        break;
+    }
     case mu::engraving::FretDotType::NORMAL:
     default:
         p->setBrush(pen.color());
@@ -258,6 +280,20 @@ void FretCanvas::getPosition(const QPointF& p, int* string, int* fret)
     *string = (p.x() - xo + stringDist * .5) / stringDist;
 }
 
+void FretCanvas::setTopMarker(int string, int markerType)
+{
+    if (!m_diagram) {
+        return;
+    }
+    globalContext()->currentNotation()->undoStack()->prepareChanges(muse::TranslatableString("undoableAction", "Edit fretboard diagram"));
+    auto mtype = static_cast<mu::engraving::FretMarkerType>(markerType);
+    if (mtype == mu::engraving::FretMarkerType::NONE) {
+        m_diagram->undoSetFretDot(string, 0);
+    }
+    m_diagram->undoSetFretMarker(string, mtype);
+    update();
+}
+
 void FretCanvas::mousePressEvent(QMouseEvent* ev)
 {
     int string;
@@ -272,21 +308,20 @@ void FretCanvas::mousePressEvent(QMouseEvent* ev)
 
     globalContext()->currentNotation()->undoStack()->prepareChanges(muse::TranslatableString("undoableAction", "Edit fretboard diagram"));
 
-    // Click above the fret diagram, so change the open/closed string marker
+    // Click above the fret diagram: open marker selection menu
     if (fret == 0) {
-        switch (m_diagram->marker(string).mtype) {
-        case mu::engraving::FretMarkerType::CIRCLE:
-            m_diagram->undoSetFretMarker(string, mu::engraving::FretMarkerType::CROSS);
-            break;
-        case mu::engraving::FretMarkerType::CROSS:
-            m_diagram->undoSetFretMarker(string, mu::engraving::FretMarkerType::NONE);
-            break;
-        case mu::engraving::FretMarkerType::NONE:
-        default:
-            m_diagram->undoSetFretDot(string, 0);
-            m_diagram->undoSetFretMarker(string, mu::engraving::FretMarkerType::CIRCLE);
-            break;
-        }
+        // Calculate position: centered on string, below nut at mid first fret
+        double mag        = 1.5;
+        double _spatium   = 20.0 * mag;
+        double stringDist = _spatium * .7;
+        double fretDist   = _spatium * .8;
+        double w          = (_strings - 1) * stringDist;
+        double xo         = (width() - w) * .5;
+        double h          = (_frets * fretDist) + fretDist * .5;
+        double yo         = (height() - h) * .5;
+        int menuX = static_cast<int>(xo + string * stringDist);
+        int menuY = static_cast<int>(yo + fretDist * 0.5);
+        emit markerSelectionRequested(string, menuX, menuY);
     }
     // Otherwise, the click is on the fretboard itself
     else {
@@ -310,6 +345,7 @@ void FretCanvas::mousePressEvent(QMouseEvent* ev)
                         mu::engraving::FretDotType::NORMAL,
                         mu::engraving::FretDotType::CROSS,
                         mu::engraving::FretDotType::SQUARE,
+                        mu::engraving::FretDotType::TRIANGLE_FILLED,
                         mu::engraving::FretDotType::TRIANGLE
                     };
 

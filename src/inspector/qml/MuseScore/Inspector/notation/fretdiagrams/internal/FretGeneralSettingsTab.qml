@@ -113,10 +113,11 @@ FocusableItem {
                 enabled: root.model ? !root.model.isBarreModeOn : false
 
                 model: [
-                    { iconCode: IconCode.FRETBOARD_MARKER_CIRCLE_FILLED, value: FretDiagramTypes.DOT_NORMAL, title: qsTrc("inspector", "Normal") },
-                    { iconCode: IconCode.CLOSE_X_ROUNDED, value: FretDiagramTypes.DOT_CROSS, title: qsTrc("inspector", "Cross") },
-                    { iconCode: IconCode.STOP, value: FretDiagramTypes.DOT_SQUARE, title: qsTrc("inspector", "Square") },
-                    { iconCode: IconCode.FRETBOARD_MARKER_TRIANGLE, value: FretDiagramTypes.DOT_TRIANGLE, title: qsTrc("inspector", "Triangle") }
+                    { iconCode: IconCode.FRETBOARD_MARKER_CIRCLE_FILLED,    value: FretDiagramTypes.DOT_NORMAL,           title: qsTrc("inspector", "Normal") },
+                    { iconCode: IconCode.CLOSE_X_ROUNDED,                   value: FretDiagramTypes.DOT_CROSS,            title: qsTrc("inspector", "Cross") },
+                    { iconCode: IconCode.STOP,                              value: FretDiagramTypes.DOT_SQUARE,           title: qsTrc("inspector", "Square") },
+                    { iconCode: IconCode.FRETBOARD_MARKER_TRIANGLE,         value: FretDiagramTypes.DOT_TRIANGLE,         title: qsTrc("inspector", "Triangle") },
+                    { iconCode: IconCode.NONE,                              value: FretDiagramTypes.DOT_TRIANGLE_FILLED,  title: qsTrc("inspector", "Triangle filled") }
                 ]
 
                 delegate: FlatRadioButton {
@@ -134,6 +135,26 @@ FocusableItem {
 
                     onToggled: {
                         root.model.currentFretDotType = value
+                    }
+
+                    Canvas {
+                        id: filledTriangleCanvas
+                        visible: value === FretDiagramTypes.DOT_TRIANGLE_FILLED
+                        anchors.centerIn: parent
+                        width: 14
+                        height: 12
+
+                        onPaint: {
+                            var ctx = getContext("2d")
+                            ctx.clearRect(0, 0, width, height)
+                            ctx.fillStyle = ui.theme.fontPrimaryColor
+                            ctx.beginPath()
+                            ctx.moveTo(width / 2, 0)
+                            ctx.lineTo(width, height)
+                            ctx.lineTo(0, height)
+                            ctx.closePath()
+                            ctx.fill()
+                        }
                     }
                 }
             }

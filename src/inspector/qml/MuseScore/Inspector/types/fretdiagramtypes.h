@@ -37,14 +37,20 @@ enum class FretDot {
     DOT_NORMAL = 0,
     DOT_CROSS,
     DOT_SQUARE,
-    DOT_TRIANGLE
+    DOT_TRIANGLE,
+    DOT_TRIANGLE_FILLED = 4
 };
 Q_ENUM_NS(FretDot)
 
 enum class FretMarker {
     MARKER_NONE = 0,
     MARKER_CIRCLE,
-    MARKER_CROSS
+    MARKER_CROSS,
+    MARKER_1,
+    MARKER_2,
+    MARKER_3,
+    MARKER_4,
+    MARKER_D
 };
 Q_ENUM_NS(FretMarker)
 

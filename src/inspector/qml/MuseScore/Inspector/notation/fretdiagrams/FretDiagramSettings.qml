@@ -22,7 +22,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-
+import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import Muse.Ui
 import Muse.UiComponents
@@ -84,6 +84,26 @@ Item {
                 width: parent.width
 
                 // TODO: keyboard navigation
+
+                onMarkerSelectionRequested: function(string, x, y) {
+                    markerMenu.targetString = string
+                    markerMenu.popup(fretCanvas, x, y)
+                }
+
+                QQC2.Menu {
+                    id: markerMenu
+                    property int targetString: 0
+                    implicitWidth: 76
+
+                    QQC2.MenuItem { text: qsTrc("inspector", "None");      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 0) }
+                    QQC2.MenuItem { text: qsTrc("inspector", "O (open)");  onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 1) }
+                    QQC2.MenuItem { text: qsTrc("inspector", "X (muted)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 2) }
+                    QQC2.MenuItem { text: qsTrc("inspector", "1 (index)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 3) }
+                    QQC2.MenuItem { text: qsTrc("inspector", "2 (middle)");onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 4) }
+                    QQC2.MenuItem { text: qsTrc("inspector", "3 (ring)");  onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 5) }
+                    QQC2.MenuItem { text: qsTrc("inspector", "4 (pinky)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 6) }
+                    QQC2.MenuItem { text: qsTrc("inspector", "D (thumb)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 7) }
+                }
             }
 
             PropertyToggle {

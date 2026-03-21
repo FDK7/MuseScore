@@ -2400,7 +2400,11 @@ void TLayout::layoutFretDiagram(const FretDiagram* item, FretDiagram::LayoutData
     ldata->stringDist = ctx.conf().styleAbsolute(Sid::fretStringSpacing) * item->userMag();
     ldata->fretDist = ctx.conf().styleAbsolute(Sid::fretFretSpacing) * item->userMag();
     ldata->markerSize = ldata->stringDist * .8;
-    ldata->markerY = ldata->nutY - 0.5 * ldata->nutLineWidth - ldata->markerSize - 0.20 * spatium;
+    // For double-line nut the top of the nut is at -4*stringLineWidth; otherwise use nutY
+    double nutTopY = (!item->fretOffset() && item->showNut())
+                     ? -3.0 * ldata->stringLineWidth
+                     : ldata->nutY - 0.5 * ldata->nutLineWidth;
+    ldata->markerY = nutTopY - ldata->markerSize - 0.20 * spatium;
     bool extendedStyle = item->style().styleB(Sid::fretStyleExtended);
     ldata->stringExtendTop = item->fretOffset() && extendedStyle ? -spatium * .2 : 0.0;
     ldata->stringExtendBottom = extendedStyle ? 0.5 * ldata->fretDist : 0.0;
