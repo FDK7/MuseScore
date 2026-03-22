@@ -25,6 +25,7 @@
 #include <cmath>
 
 #include "engraving/dom/fret.h"
+#include "engraving/style/styledef.h"
 
 using namespace mu::inspector;
 
@@ -44,7 +45,13 @@ void FretCanvas::draw(QPainter* painter)
     double _spatium   = 20.0 * mag;
     double lw1        = _spatium * 0.08;
     int fretOffset    = m_diagram->fretOffset();
-    double lw2        = (fretOffset || !m_diagram->showNut()) ? lw1 : _spatium * 0.2;
+    bool isDoubleNut  = m_diagram->showNut() && !fretOffset
+                        && m_diagram->style().styleI(mu::engraving::Sid::fretNutType)
+                           == int(mu::engraving::FretNutType::DOUBLE);
+    double nutThickness = isDoubleNut
+                          ? _spatium * 0.08
+                          : _spatium * 0.3;
+    double lw2        = (fretOffset || !m_diagram->showNut()) ? lw1 : nutThickness;
     double stringDist = _spatium * .7;
     double fretDist   = _spatium * .8;
     int _strings      = m_diagram->strings();
@@ -71,15 +78,16 @@ void FretCanvas::draw(QPainter* painter)
     double x2 = (_strings - 1) * stringDist;
 
     if (!fretOffset && m_diagram->showNut()) {
-        // Double-line nut: two lines, each lw1 wide, gap = lw1
-        pen.setWidthF(lw1);
+        pen.setWidthF(lw2);
         painter->setPen(pen);
-        double yNutLower = -lw1 * 0.5;          // bottom edge touches y=0
-        double yNutUpper = -lw1 * 2.5;          // gap of lw1 between rendered lines
-        painter->drawLine(QLineF(-lw1 * .5, yNutUpper, x2 + lw1 * .5, yNutUpper));
-        painter->drawLine(QLineF(-lw1 * .5, yNutLower, x2 + lw1 * .5, yNutLower));
+        if (isDoubleNut) {
+            painter->drawLine(QLineF(-lw2 * .5, -lw2 * 2.5, x2 + lw2 * .5, -lw2 * 2.5));
+            painter->drawLine(QLineF(-lw2 * .5, -lw2 * 0.5, x2 + lw2 * .5, -lw2 * 0.5));
+        } else {
+            double yNut = -0.5 * (lw2 - lw1);
+            painter->drawLine(QLineF(-lw1 * .5, yNut, x2 + lw1 * .5, yNut));
+        }
     } else {
-        // Single line for fret-offset diagrams or when nut is hidden
         pen.setWidthF(lw2);
         painter->setPen(pen);
         double yNut = -0.5 * (lw2 - lw1);
@@ -95,7 +103,7 @@ void FretCanvas::draw(QPainter* painter)
     symPen.setWidthF(lw1 * 1.2);
 
     // Draw strings and frets
-    double stringTop = (!fretOffset && m_diagram->showNut()) ? -lw1 * 3.0 : 0.0;
+    double stringTop = isDoubleNut ? -lw2 * 3.0 : 0.0;
     for (int i = 0; i < _strings; ++i) {
         double x = stringDist * i;
         painter->drawLine(QLineF(x, stringTop, x, y2));

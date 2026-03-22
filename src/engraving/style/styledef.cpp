@@ -457,6 +457,8 @@ const std::array<StyleDef::StyleValue, size_t(Sid::STYLES)> StyleDef::styleValue
     styleDef(maxFretShiftAbove,                          0.0_sp),
     styleDef(maxFretShiftBelow,                          0.0_sp),
     styleDef(fretNutThickness,                           0.3_sp),
+    styleDef(fretNutType,                                int(0)),    // 0=SINGLE, 1=DOUBLE
+    styleDef(fretNutDoubleThickness,                     0.08_sp),
     styleDef(fretUseCustomSuffix,                        false),
     styleDef(fretCustomSuffix,                           "fr"),
     styleDef(barreAppearanceSlur,                        false),

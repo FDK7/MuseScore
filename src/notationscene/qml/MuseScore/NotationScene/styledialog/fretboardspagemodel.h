@@ -34,6 +34,8 @@ class FretboardsPageModel : public AbstractStyleDialogModel
     Q_PROPERTY(mu::notation::StyleItem * fretMag READ fretMag CONSTANT)
     Q_PROPERTY(mu::notation::StyleItem * fretOrientation READ fretOrientation CONSTANT)
     Q_PROPERTY(mu::notation::StyleItem * fretNutThickness READ fretNutThickness CONSTANT)
+    Q_PROPERTY(mu::notation::StyleItem * fretNutType READ fretNutType CONSTANT)
+    Q_PROPERTY(mu::notation::StyleItem * fretNutDoubleThickness READ fretNutDoubleThickness CONSTANT)
     Q_PROPERTY(mu::notation::StyleItem * fretNumPos READ fretNumPos CONSTANT)
     Q_PROPERTY(mu::notation::StyleItem * fretUseCustomSuffix READ fretUseCustomSuffix CONSTANT)
     Q_PROPERTY(mu::notation::StyleItem * fretCustomSuffix READ fretCustomSuffix CONSTANT)
@@ -55,6 +57,8 @@ public:
     StyleItem* fretMag() const;
     StyleItem* fretOrientation() const;
     StyleItem* fretNutThickness() const;
+    StyleItem* fretNutType() const;
+    StyleItem* fretNutDoubleThickness() const;
     StyleItem* fretNumPos() const;
     StyleItem* fretUseCustomSuffix() const;
     StyleItem* fretCustomSuffix() const;

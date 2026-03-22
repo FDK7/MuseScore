@@ -9099,7 +9099,7 @@ niemals linksbündig ausrichten</translation>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2493"/>
         <source>Voice 1</source>
-        <translation>Stimme 1</translation>
+        <translation>1. Stimme</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2494"/>
@@ -9109,7 +9109,7 @@ niemals linksbündig ausrichten</translation>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2500"/>
         <source>Voice 2</source>
-        <translation>Stimme 2</translation>
+        <translation>2. Stimme</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2501"/>
@@ -9119,7 +9119,7 @@ niemals linksbündig ausrichten</translation>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2507"/>
         <source>Voice 3</source>
-        <translation>Stimme 3</translation>
+        <translation>3. Stimme</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2508"/>
@@ -9129,7 +9129,7 @@ niemals linksbündig ausrichten</translation>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2514"/>
         <source>Voice 4</source>
-        <translation>Stimme 4</translation>
+        <translation>4. Stimme</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2515"/>
@@ -27484,6 +27484,18 @@ Darüber hinaus bietet Mastering MuseScore eine unterstützende Community von Mu
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/styledialog/FretboardsPage.qml" line="90"/>
         <source>Nut line thickness:</source>
         <translation>Sattelliniendicke:</translation>
+    </message>
+    <message>
+        <source>Nut line type:</source>
+        <translation>Sattellinientyp:</translation>
+    </message>
+    <message>
+        <source>Single line</source>
+        <translation>Einfachlinie</translation>
+    </message>
+    <message>
+        <source>Double line</source>
+        <translation>Doppellinie</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/styledialog/FretboardsPage.qml" line="98"/>

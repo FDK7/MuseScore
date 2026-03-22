@@ -1221,12 +1221,18 @@ void SingleDraw::draw(const FretDiagram* item, Painter* painter, const PaintOpti
     double x2 = (item->strings() - 1) * ldata->stringDist;
 
     // Draw the nut
+    bool isDoubleNut = item->showNut() && !item->fretOffset()
+                       && item->style().styleI(Sid::fretNutType) == int(FretNutType::DOUBLE);
     if (!item->fretOffset() && item->showNut()) {
-        double lw = ldata->stringLineWidth;
+        double lw = ldata->nutLineWidth;
         pen.setWidthF(lw);
         painter->setPen(pen);
-        painter->drawLine(LineF(-lw * .5, -lw * 2.5, x2 + lw * .5, -lw * 2.5));
-        painter->drawLine(LineF(-lw * .5, -lw * 0.5, x2 + lw * .5, -lw * 0.5));
+        if (isDoubleNut) {
+            painter->drawLine(LineF(-lw * .5, -lw * 2.5, x2 + lw * .5, -lw * 2.5));
+            painter->drawLine(LineF(-lw * .5, -lw * 0.5, x2 + lw * .5, -lw * 0.5));
+        } else {
+            painter->drawLine(LineF(-ldata->stringLineWidth * .5, 0.0, x2 + ldata->stringLineWidth * .5, 0.0));
+        }
     } else {
         pen.setWidthF(ldata->nutLineWidth);
         painter->setPen(pen);
@@ -1239,8 +1245,8 @@ void SingleDraw::draw(const FretDiagram* item, Painter* painter, const PaintOpti
 
     // y2 is the y val of the bottom fretline
     double y2 = ldata->fretDist * item->frets();
-    double stringTop = (!item->fretOffset() && item->showNut())
-                       ? -ldata->stringLineWidth * 3.0
+    double stringTop = isDoubleNut
+                       ? -ldata->nutLineWidth * 3.0
                        : 0.0;
     for (int i = 0; i < item->strings(); ++i) {
         double x = ldata->stringDist * i;

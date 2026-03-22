@@ -2394,15 +2394,18 @@ void TLayout::layoutFretDiagram(const FretDiagram* item, FretDiagram::LayoutData
     LAYOUT_CALL_ITEM(item);
     double spatium  = item->spatium() * item->userMag();
     ldata->stringLineWidth = spatium * 0.08;
-    ldata->nutLineWidth = ((item->fretOffset() || !item->showNut()) ? ldata->stringLineWidth
-                           : ctx.conf().styleAbsolute(Sid::fretNutThickness) * item->userMag());
+    bool isDoubleNut = item->showNut() && !item->fretOffset()
+                       && item->style().styleI(Sid::fretNutType) == int(FretNutType::DOUBLE);
+    double nutThickness = isDoubleNut
+                          ? ctx.conf().styleAbsolute(Sid::fretNutDoubleThickness) * item->userMag()
+                          : ctx.conf().styleAbsolute(Sid::fretNutThickness) * item->userMag();
+    ldata->nutLineWidth = ((item->fretOffset() || !item->showNut()) ? ldata->stringLineWidth : nutThickness);
     ldata->nutY = -0.5 * (ldata->nutLineWidth - ldata->stringLineWidth);
     ldata->stringDist = ctx.conf().styleAbsolute(Sid::fretStringSpacing) * item->userMag();
     ldata->fretDist = ctx.conf().styleAbsolute(Sid::fretFretSpacing) * item->userMag();
     ldata->markerSize = ldata->stringDist * .8;
-    // For double-line nut the top of the nut is at -4*stringLineWidth; otherwise use nutY
-    double nutTopY = (!item->fretOffset() && item->showNut())
-                     ? -3.0 * ldata->stringLineWidth
+    double nutTopY = isDoubleNut
+                     ? -3.0 * ldata->nutLineWidth
                      : ldata->nutY - 0.5 * ldata->nutLineWidth;
     ldata->markerY = nutTopY - ldata->markerSize - 0.20 * spatium;
     bool extendedStyle = item->style().styleB(Sid::fretStyleExtended);

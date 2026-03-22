@@ -44,6 +44,11 @@ enum class FretDotType : signed char {
     TRIANGLE_FILLED = 4
 };
 
+enum class FretNutType : int {
+    SINGLE = 0,
+    DOUBLE = 1
+};
+
 enum class FretMarkerType : signed char {
     NONE,
     CIRCLE,

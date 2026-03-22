@@ -86,10 +86,122 @@ StyledFlickable {
             }
 
             StyleSpinboxWithReset {
-                styleItem: fretboardsPage.fretNutThickness
+                styleItem: fretboardsPage.fretNutType.value === 0
+                           ? fretboardsPage.fretNutThickness
+                           : fretboardsPage.fretNutDoubleThickness
                 label: qsTrc("notation", "Nut line thickness:")
                 suffix: qsTrc("global", "sp")
                 controlAreaWidth: root.controlAreaWidth
+            }
+
+            // Nut type selector — same structure as IconAndTextButtonSelector
+            StyleControlRowWithReset {
+                styleItem: fretboardsPage.fretNutType
+                label: qsTrc("notation", "Nut line type:")
+                controlAreaWidth: root.controlAreaWidth
+
+                RadioButtonGroup {
+                    id: nutTypeGroup
+                    anchors.fill: parent
+
+                    model: [
+                        { value: 0, text: qsTrc("notation", "Single line"), isDouble: false },
+                        { value: 1, text: qsTrc("notation", "Double line"), isDouble: true }
+                    ]
+
+                    delegate: FlatRadioButton {
+                        id: nutTypeButton
+                        required property var modelData
+                        required property int index
+
+                        height: 70
+
+                        checked: fretboardsPage.fretNutType.value === modelData.value
+                        onToggled: fretboardsPage.fretNutType.value = modelData.value
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 6
+
+                            Canvas {
+                                width: 56
+                                height: 36
+                                anchors.horizontalCenter: parent.horizontalCenter
+
+                                readonly property bool isDouble: nutTypeButton.modelData.isDouble
+                                readonly property bool isSelected: nutTypeButton.checked
+
+                                onPaint: {
+                                    var ctx2 = getContext("2d")
+                                    ctx2.clearRect(0, 0, width, height)
+
+                                    var strings = 6
+                                    var frets = 2
+                                    var margin = 2
+                                    var strDist = (width - 2 * margin) / (strings - 1)
+                                    var y0 = 14
+                                    var fretDist = (height - y0 - margin) / frets
+                                    var x0 = margin
+                                    var x1 = x0 + (strings - 1) * strDist
+                                    var lw = 0.8
+                                    var nutLw = isDouble ? 1.5 : 3.0
+                                    var col = isSelected ? "white" : ui.theme.fontPrimaryColor
+
+                                    ctx2.strokeStyle = col
+                                    ctx2.lineCap = "square"
+
+                                    // Fret lines
+                                    ctx2.lineWidth = lw
+                                    for (var f = 0; f <= frets; f++) {
+                                        var fy = y0 + f * fretDist
+                                        ctx2.beginPath()
+                                        ctx2.moveTo(x0, fy)
+                                        ctx2.lineTo(x1, fy)
+                                        ctx2.stroke()
+                                    }
+
+                                    // Strings
+                                    var stringTop = isDouble ? y0 - nutLw * 3 : y0 - nutLw * 0.5
+                                    for (var s = 0; s < strings; s++) {
+                                        var sx = x0 + s * strDist
+                                        ctx2.beginPath()
+                                        ctx2.moveTo(sx, stringTop)
+                                        ctx2.lineTo(sx, y0 + frets * fretDist)
+                                        ctx2.stroke()
+                                    }
+
+                                    // Nut
+                                    ctx2.lineWidth = nutLw
+                                    if (isDouble) {
+                                        ctx2.beginPath()
+                                        ctx2.moveTo(x0, y0 - nutLw * 2.5)
+                                        ctx2.lineTo(x1, y0 - nutLw * 2.5)
+                                        ctx2.stroke()
+                                        ctx2.beginPath()
+                                        ctx2.moveTo(x0, y0 - nutLw * 0.5)
+                                        ctx2.lineTo(x1, y0 - nutLw * 0.5)
+                                        ctx2.stroke()
+                                    } else {
+                                        ctx2.beginPath()
+                                        ctx2.moveTo(x0, y0 - nutLw * 0.5)
+                                        ctx2.lineTo(x1, y0 - nutLw * 0.5)
+                                        ctx2.stroke()
+                                    }
+                                }
+
+                                Connections {
+                                    target: fretboardsPage.fretNutType
+                                    function onValueChanged() { parent.requestPaint() }
+                                }
+                            }
+
+                            StyledTextLabel {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: nutTypeButton.modelData.text
+                            }
+                        }
+                    }
+                }
             }
 
             StyledGroupBox {

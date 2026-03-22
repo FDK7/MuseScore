@@ -31,6 +31,8 @@ FretboardsPageModel::FretboardsPageModel(QObject* parent)
     StyleId::fretMag,
     StyleId::fretOrientation,
     StyleId::fretNutThickness,
+    StyleId::fretNutType,
+    StyleId::fretNutDoubleThickness,
     StyleId::fretNumPos,
     StyleId::fretUseCustomSuffix,
     StyleId::fretCustomSuffix,
@@ -50,6 +52,8 @@ StyleItem* FretboardsPageModel::fretMinDistance() const { return styleItem(Style
 StyleItem* FretboardsPageModel::fretMag() const { return styleItem(StyleId::fretMag); }
 StyleItem* FretboardsPageModel::fretOrientation() const { return styleItem(StyleId::fretOrientation); }
 StyleItem* FretboardsPageModel::fretNutThickness() const { return styleItem(StyleId::fretNutThickness); }
+StyleItem* FretboardsPageModel::fretNutType() const { return styleItem(StyleId::fretNutType); }
+StyleItem* FretboardsPageModel::fretNutDoubleThickness() const { return styleItem(StyleId::fretNutDoubleThickness); }
 StyleItem* FretboardsPageModel::fretNumPos() const { return styleItem(StyleId::fretNumPos); }
 StyleItem* FretboardsPageModel::fretUseCustomSuffix() const { return styleItem(StyleId::fretUseCustomSuffix); }
 StyleItem* FretboardsPageModel::fretCustomSuffix() const { return styleItem(StyleId::fretCustomSuffix); }

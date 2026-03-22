@@ -462,6 +462,8 @@ enum class Sid : short {
     maxFretShiftAbove,
     maxFretShiftBelow,
     fretNutThickness,
+    fretNutType,
+    fretNutDoubleThickness,
     fretUseCustomSuffix,
     fretCustomSuffix,
     barreAppearanceSlur,

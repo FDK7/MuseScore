@@ -1348,13 +1348,18 @@ void TDraw::draw(const FretDiagram* item, Painter* painter, const PaintOptions& 
     double x2 = (item->strings() - 1) * ldata->stringDist;
 
     // Draw the nut
+    bool isDoubleNut = item->showNut() && !item->fretOffset()
+                       && item->style().styleI(Sid::fretNutType) == int(FretNutType::DOUBLE);
     if (!item->fretOffset() && item->showNut()) {
-        // Double-line nut: two lines each stringLineWidth wide, gap = 2 * stringLineWidth
-        double lw = ldata->stringLineWidth;
+        double lw = ldata->nutLineWidth;
         pen.setWidthF(lw);
         painter->setPen(pen);
-        painter->drawLine(LineF(-lw * .5, -lw * 2.5, x2 + lw * .5, -lw * 2.5));
-        painter->drawLine(LineF(-lw * .5, -lw * 0.5, x2 + lw * .5, -lw * 0.5));
+        if (isDoubleNut) {
+            painter->drawLine(LineF(-lw * .5, -lw * 2.5, x2 + lw * .5, -lw * 2.5));
+            painter->drawLine(LineF(-lw * .5, -lw * 0.5, x2 + lw * .5, -lw * 0.5));
+        } else {
+            painter->drawLine(LineF(-ldata->stringLineWidth * .5, ldata->nutY, x2 + ldata->stringLineWidth * .5, ldata->nutY));
+        }
     } else {
         pen.setWidthF(ldata->nutLineWidth);
         painter->setPen(pen);
@@ -1366,8 +1371,8 @@ void TDraw::draw(const FretDiagram* item, Painter* painter, const PaintOptions& 
     painter->setPen(pen);
 
     // y2 is the y val of the bottom fretline
-    double y1 = (!item->fretOffset() && item->showNut())
-                ? -ldata->stringLineWidth * 3.0
+    double y1 = isDoubleNut
+                ? -ldata->nutLineWidth * 3.0
                 : ldata->stringExtendTop;
     double y2 = ldata->fretDist * item->frets() + 0.5 * ldata->stringLineWidth + ldata->stringExtendBottom;
     for (int i = 0; i < item->strings(); ++i) {
