@@ -122,7 +122,7 @@ void FretCanvas::draw(QPainter* painter)
                 double x = stringDist * i - dotd * .5;
                 double y = fretDist * (fret - 1) + fretDist * .5 - dotd * .5;
 
-                paintDotSymbol(painter, symPen, x, y, dotd, dt.dtype);
+                paintDotSymbol(painter, symPen, x, y, dotd, fretDist, dt.dtype);
             }
         }
         painter->setPen(pen);
@@ -203,7 +203,7 @@ void FretCanvas::draw(QPainter* painter)
         double x = stringDist * m_cstring - dotd * .5;
         double y = fretDist * (m_cfret - 1) + fretDist * .5 - dotd * .5;
         painter->setBrush(Qt::lightGray);
-        paintDotSymbol(painter, symPen, x, y, dotd, dtype);
+        paintDotSymbol(painter, symPen, x, y, dotd, fretDist, dtype);
     }
 
     if (fretOffset > 0) {  // TODO: get the value from Sid::fretNumMag
@@ -237,7 +237,7 @@ void FretCanvas::draw(QPainter* painter)
     }
 }
 
-void FretCanvas::paintDotSymbol(QPainter* p, QPen& pen, qreal x, qreal y, qreal dotd, mu::engraving::FretDotType dtype)
+void FretCanvas::paintDotSymbol(QPainter* p, QPen& pen, qreal x, qreal y, qreal dotd, qreal fretDist, mu::engraving::FretDotType dtype)
 {
     switch (dtype) {
     case mu::engraving::FretDotType::CROSS:
@@ -256,9 +256,15 @@ void FretCanvas::paintDotSymbol(QPainter* p, QPen& pen, qreal x, qreal y, qreal 
         break;
     case mu::engraving::FretDotType::TRIANGLE_FILLED: {
         p->setBrush(pen.color());
-        QPolygonF tri;
-        tri << QPointF(x, y + dotd) << QPointF(x + .5 * dotd, y) << QPointF(x + dotd, y + dotd);
         p->setPen(Qt::NoPen);
+        double tipY  = y - fretDist * 0.5 + dotd * 0.5;
+        double baseY = y + fretDist * 0.5 + dotd * 0.5 - fretDist * 0.1;
+        double cx    = x + dotd * 0.5;
+        double half  = dotd * 0.4;
+        QPolygonF tri;
+        tri << QPointF(cx - half, baseY)
+            << QPointF(cx, tipY)
+            << QPointF(cx + half, baseY);
         p->drawPolygon(tri);
         break;
     }

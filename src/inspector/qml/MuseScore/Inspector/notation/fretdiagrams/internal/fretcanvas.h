@@ -84,7 +84,7 @@ private:
     void mousePressEvent(QMouseEvent*) override;
     void hoverMoveEvent(QHoverEvent*) override;
 
-    void paintDotSymbol(QPainter* p, QPen& pen, qreal y, qreal x, qreal dotd, engraving::FretDotType dtype);
+    void paintDotSymbol(QPainter* p, QPen& pen, qreal x, qreal y, qreal dotd, qreal fretDist, engraving::FretDotType dtype);
     void getPosition(const QPointF& pos, int* string, int* fret);
 
     engraving::FretDiagram* m_diagram = nullptr;

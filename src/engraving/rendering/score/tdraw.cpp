@@ -1430,8 +1430,14 @@ void TDraw::draw(const FretDiagram* item, Painter* painter, const PaintOptions& 
             case FretDotType::TRIANGLE_FILLED: {
                 painter->setBrush(symPen.color());
                 painter->setNoPen();
+                double tipY  = ldata->fretDist * fret;
+                double baseY = ldata->fretDist * (fret + 1) - ldata->fretDist * 0.1;
+                double cx    = ldata->stringDist * string;
+                double half  = dotd * 0.4;
                 PolygonF tri;
-                tri << PointF(x, y + dotd) << PointF(x + .5 * dotd, y) << PointF(x + dotd, y + dotd);
+                tri << PointF(cx - half, baseY)
+                    << PointF(cx, tipY)
+                    << PointF(cx + half, baseY);
                 painter->drawPolygon(tri);
                 break;
             }
