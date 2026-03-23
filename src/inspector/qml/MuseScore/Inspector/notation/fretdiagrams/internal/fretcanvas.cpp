@@ -334,7 +334,7 @@ void FretCanvas::mousePressEvent(QMouseEvent* ev)
         double h          = (_frets * fretDist) + fretDist * .5;
         double yo         = (height() - h) * .5;
         int menuX = static_cast<int>(xo + string * stringDist);
-        int menuY = static_cast<int>(yo + fretDist * 0.5);
+        int menuY = static_cast<int>(yo);
         emit markerSelectionRequested(string, menuX, menuY);
     }
     // Otherwise, the click is on the fretboard itself

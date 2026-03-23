@@ -87,22 +87,35 @@ Item {
 
                 onMarkerSelectionRequested: function(string, x, y) {
                     markerMenu.targetString = string
-                    markerMenu.popup(fretCanvas, x, y)
+                    markerMenu.popup(fretCanvas, x - markerMenu.implicitWidth / 2, y)
                 }
 
                 QQC2.Menu {
                     id: markerMenu
                     property int targetString: 0
-                    implicitWidth: 76
+                    implicitWidth: 40
 
-                    QQC2.MenuItem { text: qsTrc("inspector", "None");      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 0) }
-                    QQC2.MenuItem { text: qsTrc("inspector", "O (open)");  onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 1) }
-                    QQC2.MenuItem { text: qsTrc("inspector", "X (muted)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 2) }
-                    QQC2.MenuItem { text: qsTrc("inspector", "1 (index)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 3) }
-                    QQC2.MenuItem { text: qsTrc("inspector", "2 (middle)");onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 4) }
-                    QQC2.MenuItem { text: qsTrc("inspector", "3 (ring)");  onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 5) }
-                    QQC2.MenuItem { text: qsTrc("inspector", "4 (pinky)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 6) }
-                    QQC2.MenuItem { text: qsTrc("inspector", "D (thumb)"); onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 7) }
+                    component MarkerMenuItem: QQC2.MenuItem {
+                        implicitHeight: 24
+                        leftPadding: 0
+                        rightPadding: 0
+                        contentItem: Text {
+                            text: parent.text
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: parent.palette.windowText
+                            font: parent.font
+                        }
+                    }
+
+                    MarkerMenuItem { text: " ";      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 0) }
+                    MarkerMenuItem { text: "\u25CB"; onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 1) }
+                    MarkerMenuItem { text: "\u00D7"; onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 2) }
+                    MarkerMenuItem { text: "1";      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 3) }
+                    MarkerMenuItem { text: "2";      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 4) }
+                    MarkerMenuItem { text: "3";      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 5) }
+                    MarkerMenuItem { text: "4";      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 6) }
+                    MarkerMenuItem { text: "D";      onTriggered: fretCanvas.setTopMarker(markerMenu.targetString, 7) }
                 }
             }
 
